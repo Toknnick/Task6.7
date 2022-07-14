@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Task6._7
@@ -41,7 +41,6 @@ namespace Task6._7
     {
         private List<Train> _waitingTrains = new List<Train>();
         private List<Train> _sentTrains = new List<Train>();
-        private Train _train = new Train();
 
         public void CreateRoute()
         {
@@ -51,100 +50,85 @@ namespace Task6._7
 
         public void SendTrain()
         {
-            ChooseTrain();
+            Console.Clear();
+            Console.WriteLine("Поезда ожидающие в депо:");
+            ShowInfoAboutTrains(_waitingTrains, "депо");
+
+            if (_waitingTrains.Count > 0)
+            {
+                bool isRepeating = true;
+                Console.WriteLine("Выберите номер поезда:");
+
+                while (isRepeating)
+                {
+                    string userInput = Console.ReadLine();
+
+                    if (int.TryParse(userInput, out int number))
+                    {
+                        number -= 1;
+
+                        if (number >= 0 && number < _waitingTrains.Count)
+                        {
+                            _sentTrains.Add(_waitingTrains[number]);
+                            _waitingTrains.RemoveAt(number);
+                            Console.WriteLine("Поезд отправлен успешно!");
+                            GetMessage();
+                            return;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Поезд не найден!");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Данные некорректные");
+                    }
+
+                    Console.WriteLine("Попробуйте снова:");
+                }
+            }
+
+            GetMessage();
         }
 
         public void ShowInfoAboutWaitingTrains()
         {
-            if (_waitingTrains.Count > 0)
-            {
-                for (int i = 0; i < _waitingTrains.Count; i++)
-                {
-                    _waitingTrains[i].ShowInfo((i + 1));
-                }
-            }
-            else
-            {
-                Console.WriteLine("Поездов в депо нет!");
-            }
+            ShowInfoAboutTrains(_waitingTrains, "депо");
         }
 
         public void ShowInfoAboutSentTrains()
         {
-            if (_sentTrains.Count > 0)
+            ShowInfoAboutTrains(_sentTrains, "пути");
+        }
+
+        private void ShowInfoAboutTrains(List<Train> list, string word)
+        {
+            if (list.Count > 0)
             {
-                for (int i = 0; i < _sentTrains.Count; i++)
+                for (int i = 0; i < list.Count; i++)
                 {
-                    _sentTrains[i].ShowInfo((i + 1));
+                    list[i].ShowInfo((i + 1));
                 }
             }
             else
             {
-                Console.WriteLine("Поездов в пути нет!");
+                Console.WriteLine($"Поездов в {word} нет!");
             }
         }
 
         private string ChooseStartWay()
         {
             Console.WriteLine("Выберите пункт отправления:");
-            _train.BeginningOfWay = Console.ReadLine();
-            return _train.BeginningOfWay;
+           string beginningOfWay = Console.ReadLine();
+            return beginningOfWay;
         }
 
         private string ChooseEndWay()
         {
             Console.WriteLine("Выберите пункт прибытия:");
-            _train.EndingOfWay = Console.ReadLine();
-            return _train.EndingOfWay;
-        }
-
-        private void ChooseTrain()
-        {
-            Console.Clear();
-            Console.WriteLine("Поезда ожидающие в депо:");
-            ShowInfoAboutWaitingTrains();
-
-            if (_waitingTrains.Count > 0)
-            {
-                TrainDeparture();
-            }
-
-            GetMessage();
-
-        }
-
-        private void TrainDeparture()
-        {
-            bool isRepeating = true;
-            Console.WriteLine("Выберите номер поезда:");
-
-            while (isRepeating)
-            {
-                string userInput = Console.ReadLine();
-
-                if (int.TryParse(userInput, out int number))
-                {
-                    number -= 1;
-
-                    if (number >= 0 && number < _waitingTrains.Count)
-                    {
-                        _sentTrains.Add(_waitingTrains[number]);
-                        _waitingTrains.RemoveAt(number);
-                        Console.WriteLine("Поезд отправлен успешно!");
-                        return;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Поезд не найден!");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Данные некорректные");
-                }
-
-                Console.WriteLine("Попробуйте снова:");
-            }
+            string endingOfWay = Console.ReadLine();
+            return endingOfWay;
         }
 
         private void GetMessage()
@@ -159,23 +143,22 @@ namespace Task6._7
         private int _countOfPassangers;
         private int _countOfCarriages;
 
-        public string BeginningOfWay { get; set; }
-        public string EndingOfWay { get; set; }
+        private string _beginningOfWay;
+        private string _endingOfWay;
 
         public Train(string beginningOfWay, string endingOfWay)
         {
-            BeginningOfWay = beginningOfWay;
-            EndingOfWay = endingOfWay;
+            _beginningOfWay = beginningOfWay;
+            _endingOfWay = endingOfWay;
             _countOfPassangers = GetRandomCountOfPassangers();
             _countOfCarriages = GetCountOfCarriages();
         }
 
-        public Train() { }
-
         public void ShowInfo(int id)
         {
-            Console.WriteLine($"{id}. {BeginningOfWay} - {EndingOfWay}. Число пассажиров: {_countOfPassangers}. Число вагонов: {_countOfCarriages}");
+            Console.WriteLine($"{id}. {_beginningOfWay} - {_endingOfWay}. Число пассажиров: {_countOfPassangers}. Число вагонов: {_countOfCarriages}");
         }
+
         private int GetCountOfCarriages()
         {
             int numberOfPassangerInCarriages = GetNumberOfSeats();
@@ -183,7 +166,7 @@ namespace Task6._7
 
             if (_countOfPassangers % numberOfPassangerInCarriages < numberOfPassangerInCarriages)
                 countOFCarriages += 1;
-
+            
             return countOFCarriages;
         }
 
@@ -200,7 +183,7 @@ namespace Task6._7
             Random random = new Random();
             int maxValue = 10;
             int minValue = 5;
-            int numberOfSeats = random.Next(minValue,maxValue);
+            int numberOfSeats = random.Next(minValue, maxValue);
             return numberOfSeats;
         }
     }
